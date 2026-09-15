@@ -1,0 +1,195 @@
+package org.fadhel.ecommerceapi.Controller;
+
+
+import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
+import org.fadhel.ecommerceapi.Api.ApiResponse;
+import org.fadhel.ecommerceapi.Model.User;
+import org.fadhel.ecommerceapi.Service.UserService;
+import org.springframework.http.ResponseEntity;
+import org.springframework.validation.Errors;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.ArrayList;
+
+@RestController
+@RequestMapping("/api/v1/user")
+@RequiredArgsConstructor
+public class UserController {
+
+    private final UserService userService;
+
+
+    // to get all users
+    @GetMapping("/get")
+    public ResponseEntity<?> getUsers() {
+
+        ArrayList<User> users = userService.getUsers();
+
+        return ResponseEntity.status(200).body(users);
+    }
+
+    // to add a user
+    @PostMapping("/add")
+    public ResponseEntity<?> addUser(@RequestBody @Valid User user, Errors errors) {
+
+        if (errors.hasErrors()) {
+            String message = errors.getFieldError().getDefaultMessage();
+            return ResponseEntity.status(400).body(new ApiResponse(message));
+        }
+
+        boolean isAdded = userService.addUser(user);
+
+        if(isAdded == false) {
+            return ResponseEntity.status(400).body(new ApiResponse("User ID is taken"));
+        }
+
+        return ResponseEntity.status(200).body(new ApiResponse("User added successfully"));
+    }
+
+    // to update a user
+    @PutMapping("/update/{id}")
+    public ResponseEntity<?> updateUser(@PathVariable String id, @RequestBody @Valid User user, Errors errors) {
+
+        if (errors.hasErrors()) {
+            String message = errors.getFieldError().getDefaultMessage();
+            return ResponseEntity.status(400).body(new ApiResponse(message));
+        }
+
+        boolean isUpdated = userService.updateUser(id, user);
+
+        if (isUpdated == false) {
+            return ResponseEntity.status(400).body(new ApiResponse("No user found"));
+        }
+
+        return ResponseEntity.status(200).body(new ApiResponse("User updated successfully"));
+    }
+
+    // to delete a user
+    @DeleteMapping("/delete/{id}")
+    public ResponseEntity<?> deleteUser(@PathVariable String id) {
+
+        boolean isDeleted = userService.deleteUser(id);
+
+        if (isDeleted == false) {
+            return ResponseEntity.status(400).body(new ApiResponse("No user found"));
+        }
+
+        return ResponseEntity.status(200).body(new ApiResponse("User deleted successfully"));
+    }
+
+    // to get a user by id
+    @GetMapping("/get-by-id/{id}")
+    public ResponseEntity<?> getUserById(String id){
+
+        User user = userService.getUserById(id);
+
+        if(user == null) {
+            return ResponseEntity.status(400).body(new ApiResponse("User not found"));
+        }
+
+        return ResponseEntity.status(200).body(user);
+    }
+
+    // for Q12: to let user buy a product directly
+    @PostMapping("/buy-product/{id}/{productID}/{merchantID}")
+    public ResponseEntity<?> buyProduct(@PathVariable String id, @PathVariable String productID, @PathVariable String merchantID) {
+
+        int response = userService.buyProduct(id, productID, merchantID);
+
+        switch (response) {
+            case 0:
+                return ResponseEntity.status(400).body(new ApiResponse("No user found"));
+            case 1:
+                return ResponseEntity.status(400).body(new ApiResponse("No product found"));
+            case 2:
+                return ResponseEntity.status(400).body(new ApiResponse("No merchant found"));
+            case 3:
+                return ResponseEntity.status(400).body(new ApiResponse("No merchant stock found"));
+            case 4:
+                return ResponseEntity.status(400).body(new ApiResponse("No Stock found"));
+            case 5:
+                return ResponseEntity.status(400).body(new ApiResponse("Not enough balance"));
+            case 6:
+                return ResponseEntity.status(200).body(new ApiResponse("Product bought successfully"));
+            default:
+                return ResponseEntity.status(400).body(new ApiResponse("Something went wrong"));
+        }
+    }
+
+    // 1 outOf 5 mandatory extra: to buy product with 10% discount
+    @PostMapping("/buy-product/{id}/{productID}/{merchantID}")
+    public ResponseEntity<?> buyProductWith10Discount(@PathVariable String id, @PathVariable String productID, @PathVariable String merchantID) {
+
+        int response = userService.buyProduct(id, productID, merchantID);
+
+        switch (response) {
+            case 0:
+                return ResponseEntity.status(400).body(new ApiResponse("No user found"));
+            case 1:
+                return ResponseEntity.status(400).body(new ApiResponse("No product found"));
+            case 2:
+                return ResponseEntity.status(400).body(new ApiResponse("No merchant found"));
+            case 3:
+                return ResponseEntity.status(400).body(new ApiResponse("No merchant stock found"));
+            case 4:
+                return ResponseEntity.status(400).body(new ApiResponse("No Stock found"));
+            case 5:
+                return ResponseEntity.status(400).body(new ApiResponse("Not enough balance"));
+            case 6:
+                return ResponseEntity.status(200).body(new ApiResponse("Product bought successfully"));
+            default:
+                return ResponseEntity.status(400).body(new ApiResponse("Something went wrong"));
+        }
+    }
+
+    // 2 outOf 5 mandatory extra: to add more balance to user
+    @PostMapping("/add-balance/{id}/{additionalBalance}")
+    public ResponseEntity<?> addBalance(String id, Double additionalBalance){
+
+        boolean isAdded = userService.addBalance(id, additionalBalance);
+        if(isAdded == false) {
+            return ResponseEntity.status(400).body(new ApiResponse("No user found"));
+        }
+        return ResponseEntity.status(200).body(new ApiResponse("Additional balance added successfully, new balance: " + userService.getUserById(id).getBalance()));
+    }
+
+    // 3 outOf 5 mandatory extra: to transfer balance between two users
+    @PostMapping("/transfer-balance/{fromID}/{toID}/{transferredBalance}")
+    public ResponseEntity<?> transferBalance(String fromID, String toID, Double transferredBalance){
+
+        int response = userService.transferBalance(fromID, toID, transferredBalance);
+
+        switch (response) {
+            case 0:
+                return ResponseEntity.status(400).body(new ApiResponse("User not found"));
+            case 1:
+                return ResponseEntity.status(400).body(new ApiResponse("No sufficient balance found"));
+            case 2:
+                return ResponseEntity.status(200).body(new ApiResponse("Money transferred successfully"));
+            default:
+                return ResponseEntity.status(400).body(new ApiResponse("Something went wrong"));
+        }
+    }
+
+    /* 4 outOf 5 mandatory extra: to get all customers that have balance more than or equal to 1000
+     and gift them with 100 extra balance only one time
+     */
+    @PutMapping("/gift-customers")
+    public ResponseEntity<?> giftCustomersWithBalanceMoreThanOrEqualsTo1000() {
+
+        ArrayList<User> users = userService.giftCustomersWithBalanceMoreThanOrEqualsTo1000();
+
+        if(users.isEmpty()) {
+            return ResponseEntity.status(400).body(new ApiResponse("No users found"));
+        }
+
+        return ResponseEntity.status(200).body(users);
+    }
+
+
+
+
+
+
+}

@@ -119,7 +119,9 @@ public class UserController {
 
     // 1 outOf 5 mandatory extras: to buy product with 10% discount
     @PostMapping("/buy-product/{id}/{productID}/{merchantID}")
-    public ResponseEntity<?> buyProductWith10Discount(@PathVariable String id, @PathVariable String productID, @PathVariable String merchantID) {
+    public ResponseEntity<?> buyProductWith10Discount(@PathVariable String id,
+                                                      @PathVariable String productID,
+                                                      @PathVariable String merchantID) {
 
         int response = userService.buyProductWith10Discount(id, productID, merchantID);
 
@@ -151,13 +153,15 @@ public class UserController {
         if(isAdded == false) {
             return ResponseEntity.status(400).body(new ApiResponse("No user found"));
         }
-        return ResponseEntity.status(200).body(new ApiResponse("Additional balance added successfully, new balance: " + userService.getUserById(id).getBalance()));
+        return ResponseEntity.status(200).body(new ApiResponse("Additional balance added successfully, new balance: "
+                + userService.getUserById(id).getBalance()));
     }
 
 
     // 3 outOf 5 mandatory extras: to transfer balance between two users
     @PutMapping("/transfer-balance/{fromID}/{toID}/{transferredBalance}")
-    public ResponseEntity<?> transferBalance(@PathVariable String fromID,@PathVariable String toID,@PathVariable Double transferredBalance){
+    public ResponseEntity<?> transferBalance(@PathVariable String fromID,@PathVariable String toID,
+                                             @PathVariable Double transferredBalance){
 
         int response = userService.transferBalance(fromID, toID, transferredBalance);
 
@@ -210,7 +214,8 @@ public class UserController {
 
     // 2 outOf 3 real extras: buy a product and get one free
     @PostMapping("/buy-product-offer/{id}/{productID}/{merchantID}")
-    public ResponseEntity<?> buyProductAndGetOneFree(@PathVariable String id, @PathVariable String productID, @PathVariable String merchantID) {
+    public ResponseEntity<?> buyProductAndGetOneFree(@PathVariable String id, @PathVariable String productID,
+                                                     @PathVariable String merchantID) {
 
         int response = userService.buyProductAndGetOneFree(id, productID, merchantID);
 

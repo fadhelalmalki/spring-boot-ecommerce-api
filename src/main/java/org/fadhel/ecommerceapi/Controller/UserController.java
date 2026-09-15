@@ -118,7 +118,7 @@ public class UserController {
     }
 
     // 1 outOf 5 mandatory extras: to buy product with 10% discount
-    @PostMapping("/buy-product/{id}/{productID}/{merchantID}")
+    @PostMapping("/buy-product-discount/{id}/{productID}/{merchantID}")
     public ResponseEntity<?> buyProductWith10Discount(@PathVariable String id,
                                                       @PathVariable String productID,
                                                       @PathVariable String merchantID) {

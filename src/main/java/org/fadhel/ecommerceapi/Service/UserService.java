@@ -104,7 +104,7 @@ public class UserService {
         return 6;
     }
 
-    // 1 outOf 5 mandatory extra: to buy product with 10% discount
+    // 1 outOf 5 mandatory extras: to buy product with 10% discount
     public int buyProductWith10Discount(String id, String productID, String merchantID){
 
         User user = getUserById(id);
@@ -140,7 +140,7 @@ public class UserService {
         return 6;
     }
 
-    // 2 outOf 5 mandatory extra: to add more balance to user
+    // 2 outOf 5 mandatory extras: to add more balance to user
     public boolean addBalance(String id, Double additionalBalance){
         User user = getUserById(id);
 
@@ -151,7 +151,7 @@ public class UserService {
         return true;
     }
 
-    // 3 outOf 5 mandatory extra: to transfer balance between two users
+    // 3 outOf 5 mandatory extras: to transfer balance between two users
     public int transferBalance(String fromID, String toID, Double transferredBalance){
         User fromUser = getUserById(fromID);
         User toUser = getUserById(toID);
@@ -168,7 +168,7 @@ public class UserService {
         return 2;
     }
 
-    // 4 outOf 5 mandatory extra: to withdraw balance from user
+    // 4 outOf 5 mandatory extras: to withdraw balance from user
     public int withdrawBalance(String id, Double withdrawnBalance){
         User user = getUserById(id);
         if(withdrawnBalance == null || withdrawnBalance <= 0){
@@ -185,7 +185,7 @@ public class UserService {
     }
 
 
-    /* 1 outOf 3 mandatory extra: to get all customers that have balance more than or equal to 1000
+    /* 1 outOf 3 real extras: to get all customers that have balance more than or equal to 1000
      and gift them with 100 extra balance only one time
      */
     public ArrayList<User> giftCustomersWithBalanceMoreThanOrEqualsTo1000() {
@@ -208,6 +208,43 @@ public class UserService {
         }
         return giftedCustomers;
     }
+
+    // 2 outOf 3 real extras: buy a product and get one free
+    public int buyProductAndGetOneFree(String id, String productID, String merchantID){
+
+        User user = getUserById(id);
+        Product product = productService.getProductById(productID);
+        Merchant merchant = merchantService.getMerchantById(merchantID);
+        MerchantStock merchantStock = merchantStockService.getMerchantStock(productID, merchantID);
+
+        if(user == null){
+            return 0;
+        }
+        if(product == null){
+            return 1;
+        }
+        if(merchant == null){
+            return 2;
+        }
+        if(merchantStock == null){
+            return 3;
+        }
+
+        // here stock must be more than or equals to 2 for the offer. so, I change it from 0 to 1
+        if(merchantStock.getStock() <= 1){
+            return 4;
+        }
+        if(user.getBalance() < product.getPrice()){
+            return 5;
+        }
+
+        // here I change it from 1 to 2 to deduct from stock per the offer
+        merchantStock.setStock(merchantStock.getStock() - 2);
+        user.setBalance(user.getBalance() - product.getPrice());
+
+        return 6;
+    }
+
 
 
 

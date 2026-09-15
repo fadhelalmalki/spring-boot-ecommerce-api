@@ -90,7 +90,7 @@ public class ProductController {
         return ResponseEntity.status(200).body(product);
     }
 
-    // 5 outOf 5 mandatory extra: to get all products by the price range
+    // 5 outOf 5 mandatory extras: to get all products by the price range
     @GetMapping("/get-products-by-price-range/{minPrice}/{maxPrice}")
     public ResponseEntity<?> getProductsByPriceRange(@PathVariable Double minPrice,@PathVariable Double maxPrice){
 
@@ -104,6 +104,20 @@ public class ProductController {
 
         ArrayList<Product> products = productService.getProductsByPriceRange(minPrice,maxPrice);
 
+        if(products == null) {
+            return ResponseEntity.status(400).body(new ApiResponse("No products found"));
+        }
+        return ResponseEntity.status(200).body(products);
+    }
+
+    // 3 outOf 3 real extras: get all products under specific price
+    @GetMapping("/get-products-under-price/{specificPrice}")
+    public ResponseEntity<?> getProductsUnderSpecificPrice(@PathVariable Double specificPrice){
+
+        if(specificPrice == null || specificPrice <= 0) {
+            return ResponseEntity.status(400).body(new ApiResponse("Null, negative or zero values not allowed"));
+        }
+        ArrayList<Product> products = productService.getProductsUnderSpecificPrice(specificPrice);
         if(products == null) {
             return ResponseEntity.status(400).body(new ApiResponse("No products found"));
         }

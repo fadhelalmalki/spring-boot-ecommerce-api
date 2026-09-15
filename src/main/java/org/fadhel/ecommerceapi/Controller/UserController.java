@@ -117,11 +117,11 @@ public class UserController {
         }
     }
 
-    // 1 outOf 5 mandatory extra: to buy product with 10% discount
+    // 1 outOf 5 mandatory extras: to buy product with 10% discount
     @PostMapping("/buy-product/{id}/{productID}/{merchantID}")
     public ResponseEntity<?> buyProductWith10Discount(@PathVariable String id, @PathVariable String productID, @PathVariable String merchantID) {
 
-        int response = userService.buyProduct(id, productID, merchantID);
+        int response = userService.buyProductWith10Discount(id, productID, merchantID);
 
         switch (response) {
             case 0:
@@ -143,7 +143,7 @@ public class UserController {
         }
     }
 
-    // 2 outOf 5 mandatory extra: to add more balance to user
+    // 2 outOf 5 mandatory extras: to add more balance to user
     @PutMapping("/add-balance/{id}/{additionalBalance}")
     public ResponseEntity<?> addBalance(@PathVariable String id,@PathVariable Double additionalBalance){
 
@@ -155,7 +155,7 @@ public class UserController {
     }
 
 
-    // 3 outOf 5 mandatory extra: to transfer balance between two users
+    // 3 outOf 5 mandatory extras: to transfer balance between two users
     @PutMapping("/transfer-balance/{fromID}/{toID}/{transferredBalance}")
     public ResponseEntity<?> transferBalance(@PathVariable String fromID,@PathVariable String toID,@PathVariable Double transferredBalance){
 
@@ -173,7 +173,7 @@ public class UserController {
         }
     }
 
-    // 4 outOf 5 mandatory extra: to withdraw balance from user
+    // 4 outOf 5 mandatory extras: to withdraw balance from user
     @PutMapping("/withdraw-balance/{id}/{withdrawnBalance}")
     public ResponseEntity<?> withdrawBalance(@PathVariable String id,@PathVariable Double withdrawnBalance){
 
@@ -193,7 +193,7 @@ public class UserController {
         }
     }
 
-    /* 1 outOf 3 mandatory extra: to get all customers that have balance more than or equal to 1000
+    /* 1 outOf 3 real extras: to get all customers that have balance more than or equal to 1000
      and gift them with 100 extra balance only one time
      */
     @PutMapping("/gift-customers")
@@ -207,6 +207,34 @@ public class UserController {
 
         return ResponseEntity.status(200).body(users);
     }
+
+    // 2 outOf 3 real extras: buy a product and get one free
+    @PostMapping("/buy-product-offer/{id}/{productID}/{merchantID}")
+    public ResponseEntity<?> buyProductAndGetOneFree(@PathVariable String id, @PathVariable String productID, @PathVariable String merchantID) {
+
+        int response = userService.buyProductAndGetOneFree(id, productID, merchantID);
+
+        switch (response) {
+            case 0:
+                return ResponseEntity.status(400).body(new ApiResponse("No user found"));
+            case 1:
+                return ResponseEntity.status(400).body(new ApiResponse("No product found"));
+            case 2:
+                return ResponseEntity.status(400).body(new ApiResponse("No merchant found"));
+            case 3:
+                return ResponseEntity.status(400).body(new ApiResponse("No merchant stock found"));
+            case 4:
+                return ResponseEntity.status(400).body(new ApiResponse("No Stock found"));
+            case 5:
+                return ResponseEntity.status(400).body(new ApiResponse("Not enough balance"));
+            case 6:
+                return ResponseEntity.status(200).body(new ApiResponse("Product bought successfully"));
+            default:
+                return ResponseEntity.status(400).body(new ApiResponse("Something went wrong"));
+        }
+    }
+
+
 
 
 

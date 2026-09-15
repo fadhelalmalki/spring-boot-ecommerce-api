@@ -73,13 +73,26 @@ public class ProductService {
         return null;
     }
 
-    // 5 outOf 5 mandatory extra: to get all products by the price range
+    // 5 outOf 5 mandatory extras: to get all products by the price range
     public ArrayList<Product> getProductsByPriceRange(Double minPrice, Double maxPrice){
 
         ArrayList<Product> searchedProducts = new ArrayList<>();
 
         for(Product product : products){
             if(product.getPrice()>=minPrice&&product.getPrice()<=maxPrice){
+                searchedProducts.add(product);
+            }
+        }
+        return searchedProducts;
+    }
+
+    // 3 outOf 3 real extras: get all products under specific price
+    public ArrayList<Product> getProductsUnderSpecificPrice(Double specificPrice){
+
+        ArrayList<Product> searchedProducts = new ArrayList<>();
+
+        for(Product product : products){
+            if(product.getPrice()<=specificPrice){
                 searchedProducts.add(product);
             }
         }

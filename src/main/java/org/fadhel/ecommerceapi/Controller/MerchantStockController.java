@@ -78,7 +78,7 @@ public class MerchantStockController {
 
     // to get a merchantStock by id
     @GetMapping("/get-by-id/{id}")
-    public ResponseEntity<?> getMerchantStockById(String id){
+    public ResponseEntity<?> getMerchantStockById(@PathVariable String id){
 
         MerchantStock merchantStock = merchantStockService.getMerchantStockById(id);
 
@@ -90,7 +90,7 @@ public class MerchantStockController {
     }
 
     // for Q11: add more product stocks
-    @PostMapping("/add-stock/{productID}/{merchantID}/{additionalAmount}")
+    @PutMapping("/add-stock/{productID}/{merchantID}/{additionalAmount}")
     public ResponseEntity<?> addMoreStocks(@PathVariable String productID,
                                            @PathVariable String merchantID,
                                            @PathVariable Integer additionalAmount) {

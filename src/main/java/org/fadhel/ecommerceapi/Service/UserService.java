@@ -113,6 +113,7 @@ public class UserService {
         MerchantStock merchantStock = merchantStockService.getMerchantStock(productID, merchantID);
 
         Double discount10 = 10.0;
+        Double discountedPrice = product.getPrice()*discount10;
 
         if(user == null){
             return 0;
@@ -130,7 +131,7 @@ public class UserService {
         if(merchantStock.getStock() <= 0){
             return 4;
         }
-        if(user.getBalance() < product.getPrice()){
+        if(user.getBalance() < discountedPrice){
             return 5;
         }
         merchantStock.setStock(merchantStock.getStock() - 1);
@@ -142,6 +143,7 @@ public class UserService {
     // 2 outOf 5 mandatory extra: to add more balance to user
     public boolean addBalance(String id, Double additionalBalance){
         User user = getUserById(id);
+
         if(user == null){
             return false;
         }
@@ -166,7 +168,24 @@ public class UserService {
         return 2;
     }
 
-    /* 4 outOf 5 mandatory extra: to get all customers that have balance more than or equal to 1000
+    // 4 outOf 5 mandatory extra: to withdraw balance from user
+    public int withdrawBalance(String id, Double withdrawnBalance){
+        User user = getUserById(id);
+        if(withdrawnBalance == null || withdrawnBalance <= 0){
+            return 0;
+        }
+        if(user == null){
+            return 1;
+        }
+        if(user.getBalance() < withdrawnBalance){
+            return 2;
+        }
+        user.setBalance(user.getBalance() - withdrawnBalance);
+        return 3;
+    }
+
+
+    /* 1 outOf 3 mandatory extra: to get all customers that have balance more than or equal to 1000
      and gift them with 100 extra balance only one time
      */
     public ArrayList<User> giftCustomersWithBalanceMoreThanOrEqualsTo1000() {
@@ -189,6 +208,8 @@ public class UserService {
         }
         return giftedCustomers;
     }
+
+
 
 
 

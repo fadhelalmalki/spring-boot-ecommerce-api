@@ -78,7 +78,7 @@ public class CategoryController {
 
     // to get a category by id
     @GetMapping("/get-by-id/{id}")
-    public ResponseEntity<?> getCategoryById(String id){
+    public ResponseEntity<?> getCategoryById(@PathVariable String id){
 
         Category category = categoryService.getCategoryById(id);
 

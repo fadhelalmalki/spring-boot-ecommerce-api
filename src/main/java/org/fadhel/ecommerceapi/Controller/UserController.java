@@ -80,7 +80,7 @@ public class UserController {
 
     // to get a user by id
     @GetMapping("/get-by-id/{id}")
-    public ResponseEntity<?> getUserById(String id){
+    public ResponseEntity<?> getUserById(@PathVariable String id){
 
         User user = userService.getUserById(id);
 
@@ -144,8 +144,8 @@ public class UserController {
     }
 
     // 2 outOf 5 mandatory extra: to add more balance to user
-    @PostMapping("/add-balance/{id}/{additionalBalance}")
-    public ResponseEntity<?> addBalance(String id, Double additionalBalance){
+    @PutMapping("/add-balance/{id}/{additionalBalance}")
+    public ResponseEntity<?> addBalance(@PathVariable String id,@PathVariable Double additionalBalance){
 
         boolean isAdded = userService.addBalance(id, additionalBalance);
         if(isAdded == false) {
@@ -154,9 +154,10 @@ public class UserController {
         return ResponseEntity.status(200).body(new ApiResponse("Additional balance added successfully, new balance: " + userService.getUserById(id).getBalance()));
     }
 
+
     // 3 outOf 5 mandatory extra: to transfer balance between two users
-    @PostMapping("/transfer-balance/{fromID}/{toID}/{transferredBalance}")
-    public ResponseEntity<?> transferBalance(String fromID, String toID, Double transferredBalance){
+    @PutMapping("/transfer-balance/{fromID}/{toID}/{transferredBalance}")
+    public ResponseEntity<?> transferBalance(@PathVariable String fromID,@PathVariable String toID,@PathVariable Double transferredBalance){
 
         int response = userService.transferBalance(fromID, toID, transferredBalance);
 
@@ -172,7 +173,27 @@ public class UserController {
         }
     }
 
-    /* 4 outOf 5 mandatory extra: to get all customers that have balance more than or equal to 1000
+    // 4 outOf 5 mandatory extra: to withdraw balance from user
+    @PutMapping("/withdraw-balance/{id}/{withdrawnBalance}")
+    public ResponseEntity<?> withdrawBalance(@PathVariable String id,@PathVariable Double withdrawnBalance){
+
+        int response = userService.withdrawBalance(id, withdrawnBalance);
+
+        switch (response) {
+            case 0:
+                return ResponseEntity.status(400).body(new ApiResponse("Withdrawn balance can't be null, 0 or negative"));
+            case 1:
+                return ResponseEntity.status(400).body(new ApiResponse("No user found"));
+            case 2:
+                return ResponseEntity.status(400).body(new ApiResponse("no sufficient balance found"));
+            case 3:
+                return ResponseEntity.status(200).body(new ApiResponse("Withdrawal successfully"));
+            default:
+                return ResponseEntity.status(400).body(new ApiResponse("Something went wrong"));
+        }
+    }
+
+    /* 1 outOf 3 mandatory extra: to get all customers that have balance more than or equal to 1000
      and gift them with 100 extra balance only one time
      */
     @PutMapping("/gift-customers")
@@ -180,7 +201,7 @@ public class UserController {
 
         ArrayList<User> users = userService.giftCustomersWithBalanceMoreThanOrEqualsTo1000();
 
-        if(users.isEmpty()) {
+        if (users.isEmpty()) {
             return ResponseEntity.status(400).body(new ApiResponse("No users found"));
         }
 

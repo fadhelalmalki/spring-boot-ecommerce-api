@@ -79,7 +79,7 @@ public class ProductController {
 
     // to get a product by id
     @GetMapping("/get-by-id/{id}")
-    public ResponseEntity<?> getProductById(String id){
+    public ResponseEntity<?> getProductById(@PathVariable String id){
 
         Product product = productService.getProductById(id);
 

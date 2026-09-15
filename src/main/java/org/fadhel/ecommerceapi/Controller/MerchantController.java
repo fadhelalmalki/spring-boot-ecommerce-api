@@ -79,7 +79,7 @@ public class MerchantController {
 
     // to get a merchant by id
     @GetMapping("/get-by-id/{id}")
-    public ResponseEntity<?> getMerchantById(String id){
+    public ResponseEntity<?> getMerchantById(@PathVariable String id){
 
         Merchant merchant = merchantService.getMerchantById(id);
 

@@ -172,21 +172,37 @@ public class UserService {
         return 2;
     }
 
-    // 4 outOf 5 mandatory extras: to withdraw balance from user
-    public int withdrawBalance(String id, Double withdrawnBalance){
+    // 4 outOf 5 mandatory extras: to refund a product
+    public int refundProduct(String id, String productID, String merchantID) {
         User user = getUserById(id);
-        if(withdrawnBalance == null || withdrawnBalance <= 0){
-            return 0;
-        }
-        if(user == null){
-            return 1;
-        }
-        if(user.getBalance() < withdrawnBalance){
-            return 2;
-        }
-        user.setBalance(user.getBalance() - withdrawnBalance);
+        Product product = productService.getProductById(productID);
+        MerchantStock merchantStock = merchantStockService.getMerchantStock(productID, merchantID);
+
+        if (user == null) return 0;
+        if (product == null) return 1;
+        if (merchantStock == null) return 2;
+
+        user.setBalance(user.getBalance() + product.getPrice());
+
+        merchantStock.setStock(merchantStock.getStock() + 1);
+
         return 3;
     }
+
+//    public int withdrawBalance(String id, Double withdrawnBalance){
+//        User user = getUserById(id);
+//        if(withdrawnBalance == null || withdrawnBalance <= 0){
+//            return 0;
+//        }
+//        if(user == null){
+//            return 1;
+//        }
+//        if(user.getBalance() < withdrawnBalance){
+//            return 2;
+//        }
+//        user.setBalance(user.getBalance() - withdrawnBalance);
+//        return 3;
+//    }
 
 
     /* 1 outOf 3 real extras: to get all customers that have balance more than or equal to 1000

@@ -180,25 +180,45 @@ public class UserController {
         }
     }
 
-    // 4 outOf 5 mandatory extras: to withdraw balance from user
-    @PutMapping("/withdraw-balance/{id}/{withdrawnBalance}")
-    public ResponseEntity<?> withdrawBalance(@PathVariable String id,@PathVariable Double withdrawnBalance){
+    // 4 outOf 5 mandatory extras: to refund a product
+    @PutMapping("/refund-product/{id}/{productID}/{merchantID}")
+    public ResponseEntity<?> refundProduct(@PathVariable String id,
+                                           @PathVariable String productID,
+                                           @PathVariable String merchantID) {
 
-        int response = userService.withdrawBalance(id, withdrawnBalance);
+        int response = userService.refundProduct(id, productID, merchantID);
 
         switch (response) {
             case 0:
-                return ResponseEntity.status(400).body(new ApiResponse("Withdrawn balance can't be null, 0 or negative"));
-            case 1:
                 return ResponseEntity.status(400).body(new ApiResponse("No user found"));
+            case 1:
+                return ResponseEntity.status(400).body(new ApiResponse("No product found"));
             case 2:
-                return ResponseEntity.status(400).body(new ApiResponse("no sufficient balance found"));
+                return ResponseEntity.status(400).body(new ApiResponse("No merchant stock found"));
             case 3:
-                return ResponseEntity.status(200).body(new ApiResponse("Withdrawal successfully"));
+                return ResponseEntity.status(200).body(new ApiResponse("Product refunded successfully"));
             default:
                 return ResponseEntity.status(400).body(new ApiResponse("Something went wrong"));
         }
     }
+//    @PutMapping("/withdraw-balance/{id}/{withdrawnBalance}")
+//    public ResponseEntity<?> withdrawBalance(@PathVariable String id,@PathVariable Double withdrawnBalance){
+//
+//        int response = userService.withdrawBalance(id, withdrawnBalance);
+//
+//        switch (response) {
+//            case 0:
+//                return ResponseEntity.status(400).body(new ApiResponse("Withdrawn balance can't be null, 0 or negative"));
+//            case 1:
+//                return ResponseEntity.status(400).body(new ApiResponse("No user found"));
+//            case 2:
+//                return ResponseEntity.status(400).body(new ApiResponse("no sufficient balance found"));
+//            case 3:
+//                return ResponseEntity.status(200).body(new ApiResponse("Withdrawal successfully"));
+//            default:
+//                return ResponseEntity.status(400).body(new ApiResponse("Something went wrong"));
+//        }
+//    }
 
     /* 1 outOf 3 real extras: to get all customers that have balance more than or equal to 1000
      and gift them with 100 extra balance only one time

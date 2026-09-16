@@ -118,12 +118,13 @@ public class UserController {
     }
 
     // 1 outOf 5 mandatory extras: to buy product with 10% discount
-    @PostMapping("/buy-product-discount/{id}/{productID}/{merchantID}")
+    @PostMapping("/buy-product-discount/{id}/{productID}/{merchantID}/{coupon}")
     public ResponseEntity<?> buyProductWith10Discount(@PathVariable String id,
                                                       @PathVariable String productID,
-                                                      @PathVariable String merchantID) {
+                                                      @PathVariable String merchantID,
+                                                      @PathVariable String coupon) {
 
-        int response = userService.buyProductWith10Discount(id, productID, merchantID);
+        int response = userService.buyProductWith10Discount(id, productID, merchantID, coupon);
 
         switch (response) {
             case 0:
@@ -139,6 +140,8 @@ public class UserController {
             case 5:
                 return ResponseEntity.status(400).body(new ApiResponse("Not enough balance"));
             case 6:
+                return ResponseEntity.status(400).body(new ApiResponse("This coupon is not correct"));
+            case 7:
                 return ResponseEntity.status(200).body(new ApiResponse("Product bought successfully"));
             default:
                 return ResponseEntity.status(400).body(new ApiResponse("Something went wrong"));

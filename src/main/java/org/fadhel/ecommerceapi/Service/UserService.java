@@ -105,7 +105,7 @@ public class UserService {
     }
 
     // 1 outOf 5 mandatory extras: to buy product with 10% discount
-    public int buyProductWith10Discount(String id, String productID, String merchantID){
+    public int buyProductWith10Discount(String id, String productID, String merchantID, String coupon){
 
         User user = getUserById(id);
         Product product = productService.getProductById(productID);
@@ -134,10 +134,14 @@ public class UserService {
         if(user.getBalance() < discountedPrice){
             return 5;
         }
+        if(!coupon.equals("10Discount")){
+           return 6;
+        }
+
         merchantStock.setStock(merchantStock.getStock() - 1);
         user.setBalance(user.getBalance() - (product.getPrice() * (1-(discount10/100))));
 
-        return 6;
+        return 7;
     }
 
     // 2 outOf 5 mandatory extras: to add more balance to user

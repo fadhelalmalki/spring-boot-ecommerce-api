@@ -40,10 +40,11 @@ Each resource supports full **CRUD** operations: list all, get by ID, add, updat
 
 ### Business Logic & Bonus Endpoints
 - **Buy products** directly from a merchant's stock
-- **10% discount** on product purchase
-- **Buy one, get one free** promotion
-- **Add / withdraw / transfer balance** between users
-- **Gift customers** (balance ≥ 1000) with +100 once
+- **Refund** previously purchased products
+- **10% discount** on product purchase with coupon `10Discount` (balance ≥ 1000)
+- **Buy one, get one free** promotion with promo code `freeProduct` (balance ≥ 3000)
+- **Add / transfer balance** between users
+- **Gift customers** (balance ≥ 1000) with +100 once (**admin-only**)
 - **Restock** a merchant's product stock
 - **Filter products** by price range or by an upper price limit
 - **Bean Validation** on every model (see [Models & Validation](#models--validation))
@@ -156,12 +157,12 @@ Base path: `/api/v1/user`
 | `PUT` | `/update/{id}` | Update a user | `User` | `200` `{ "message": "User updated successfully" }` |
 | `DELETE` | `/delete/{id}` | Delete a user | — | `200` `{ "message": "User deleted successfully" }` |
 | `POST` | `/buy-product/{id}/{productID}/{merchantID}` | Buy a product | — | `200` `{ "message": "Product bought successfully" }` |
-| `POST` | `/buy-product-discount/{id}/{productID}/{merchantID}` | Buy a product with 10% discount | — | `200` `{ "message": "Product bought successfully" }` |
-| `POST` | `/buy-product-offer/{id}/{productID}/{merchantID}` | Buy one, get one free | — | `200` `{ "message": "Product bought successfully" }` |
+| `POST` | `/buy-product-discount/{id}/{productID}/{merchantID}/{coupon}` | Buy a product with 10% discount (coupon `10Discount`, balance ≥ 1000) | — | `200` `{ "message": "Product bought successfully" }` |
+| `POST` | `/buy-product-offer/{id}/{productID}/{merchantID}/{promoCode}` | Buy one, get one free (promo code `freeProduct`, balance ≥ 3000) | — | `200` `{ "message": "Product bought successfully" }` |
+| `PUT` | `/refund-product/{id}/{productID}/{merchantID}` | Refund a previously purchased product | — | `200` `{ "message": "Product refunded successfully" }` |
 | `PUT` | `/add-balance/{id}/{additionalBalance}` | Add balance to a user | — | `200` `{ "message": "Additional balance added successfully, new balance: ..." }` |
 | `PUT` | `/transfer-balance/{fromID}/{toID}/{transferredBalance}` | Transfer balance between users | — | `200` `{ "message": "Money transferred successfully" }` |
-| `PUT` | `/withdraw-balance/{id}/{withdrawnBalance}` | Withdraw balance from a user | — | `200` `{ "message": "Withdrawal successfully" }` |
-| `PUT` | `/gift-customers` | Gift +100 to customers with balance ≥ 1000 (once) | — | `200` list of gifted users |
+| `PUT` | `/gift-customers/{adminID}` | Admin-only: gift +100 to customers with balance ≥ 1000 (once) | — | `200` list of gifted users / `403` for non-admins |
 
 ---
 
@@ -218,6 +219,7 @@ All validation failures return `400` with `{ "message": "<validation error>" }`.
   { "message": "Human readable message" }
   ```
 - **Validation errors** → `400` with the failing field's message.
+- **Authorization** → `403` for admin-only actions (e.g. `gift-customers`) when the caller is not an admin.
 - **Data persistence** → in-memory `ArrayList` storage; **all data resets on restart**.
 
 ---
@@ -226,6 +228,7 @@ All validation failures return `400` with `{ "message": "<validation error>" }`.
 
 ```
 src/main/java/org/fadhel/ecommerceapi
+├── ECommerceApiApplication.java  # Spring Boot entry point
 ├── Api
 │   └── ApiResponse.java          # Uniform { message } response wrapper
 ├── Controller
@@ -239,6 +242,7 @@ src/main/java/org/fadhel/ecommerceapi
 │   ├── Merchant.java
 │   ├── MerchantStock.java
 │   ├── Product.java
+│   ├── Purchase.java
 │   └── User.java
 └── Service
     ├── CategoryService.java

@@ -140,8 +140,12 @@ public class UserController {
             case 5:
                 return ResponseEntity.status(400).body(new ApiResponse("Not enough balance"));
             case 6:
-                return ResponseEntity.status(400).body(new ApiResponse("This coupon is not correct"));
+                return ResponseEntity.status(400).body(new ApiResponse("No coupon entered"));
             case 7:
+                return ResponseEntity.status(400).body(new ApiResponse("This coupon is not correct"));
+            case 8:
+                return ResponseEntity.status(400).body(new ApiResponse("User is not eligible for discount, the balance must be greater than or equals to 1000"));
+            case 9:
                 return ResponseEntity.status(200).body(new ApiResponse("Product bought successfully"));
             default:
                 return ResponseEntity.status(400).body(new ApiResponse("Something went wrong"));
@@ -170,10 +174,12 @@ public class UserController {
 
         switch (response) {
             case 0:
-                return ResponseEntity.status(400).body(new ApiResponse("User not found"));
+                return ResponseEntity.status(400).body(new ApiResponse("Sender user not found"));
             case 1:
-                return ResponseEntity.status(400).body(new ApiResponse("No sufficient balance found"));
+                return ResponseEntity.status(400).body(new ApiResponse("Receiver user not found"));
             case 2:
+                return ResponseEntity.status(400).body(new ApiResponse("No sufficient balance found"));
+            case 3:
                 return ResponseEntity.status(200).body(new ApiResponse("Money transferred successfully"));
             default:
                 return ResponseEntity.status(400).body(new ApiResponse("Something went wrong"));
@@ -196,6 +202,8 @@ public class UserController {
             case 2:
                 return ResponseEntity.status(400).body(new ApiResponse("No merchant stock found"));
             case 3:
+                return ResponseEntity.status(400).body(new ApiResponse("No product purchased"));
+            case 4:
                 return ResponseEntity.status(200).body(new ApiResponse("Product refunded successfully"));
             default:
                 return ResponseEntity.status(400).body(new ApiResponse("Something went wrong"));
@@ -220,27 +228,35 @@ public class UserController {
 //        }
 //    }
 
-    /* 1 outOf 3 real extras: to get all customers that have balance more than or equal to 1000
-     and gift them with 100 extra balance only one time
+    /* 1 outOf 3 real extras: outOf 3 real extras: to let admin can gift customers that have balance more than or equal to 1000
+    gifting them with 100 extra balance only one time
      */
-    @PutMapping("/gift-customers")
-    public ResponseEntity<?> giftCustomersWithBalanceMoreThanOrEqualsTo1000() {
+    @PutMapping("/gift-customers/{adminID}")
+    public ResponseEntity<?> giftCustomersWithBalanceMoreThanOrEqualsTo1000(@PathVariable String adminID) {
 
-        ArrayList<User> users = userService.giftCustomersWithBalanceMoreThanOrEqualsTo1000();
+        int response = userService.giftCustomersWithBalanceMoreThanOrEqualsTo1000(adminID);
 
-        if (users.isEmpty()) {
-            return ResponseEntity.status(400).body(new ApiResponse("No users found"));
+        switch (response) {
+            case 0:
+                return ResponseEntity.status(400).body(new ApiResponse("Admin not found"));
+
+            case 1:
+                return ResponseEntity.status(403).body(new ApiResponse("Only admins can gift customers"));
+
+            case 2:
+                return ResponseEntity.status(200).body(new ApiResponse("Customers gifted successfully"));
+
+            default:
+                return ResponseEntity.status(400).body(new ApiResponse("Something went wrong"));
         }
-
-        return ResponseEntity.status(200).body(users);
     }
 
     // 2 outOf 3 real extras: buy a product and get one free
-    @PostMapping("/buy-product-offer/{id}/{productID}/{merchantID}")
+    @PostMapping("/buy-product-offer/{id}/{productID}/{merchantID}/{promoCode}")
     public ResponseEntity<?> buyProductAndGetOneFree(@PathVariable String id, @PathVariable String productID,
-                                                     @PathVariable String merchantID) {
+                                                     @PathVariable String merchantID, @PathVariable String promoCode) {
 
-        int response = userService.buyProductAndGetOneFree(id, productID, merchantID);
+        int response = userService.buyProductAndGetOneFree(id, productID, merchantID, promoCode);
 
         switch (response) {
             case 0:
@@ -252,10 +268,16 @@ public class UserController {
             case 3:
                 return ResponseEntity.status(400).body(new ApiResponse("No merchant stock found"));
             case 4:
-                return ResponseEntity.status(400).body(new ApiResponse("No Stock found"));
+                return ResponseEntity.status(400).body(new ApiResponse("No promo code entered"));
             case 5:
-                return ResponseEntity.status(400).body(new ApiResponse("Not enough balance"));
+                return ResponseEntity.status(400).body(new ApiResponse("Code is not correct"));
             case 6:
+                return ResponseEntity.status(400).body(new ApiResponse("User is not eligible for free product, the balance must be greater than or equals to 3000"));
+            case 7:
+                return ResponseEntity.status(400).body(new ApiResponse("No Stock found"));
+            case 8:
+                return ResponseEntity.status(400).body(new ApiResponse("Not enough balance"));
+            case 9:
                 return ResponseEntity.status(200).body(new ApiResponse("Product bought successfully"));
             default:
                 return ResponseEntity.status(400).body(new ApiResponse("Something went wrong"));

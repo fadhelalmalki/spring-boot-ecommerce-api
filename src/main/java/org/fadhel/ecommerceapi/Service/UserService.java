@@ -1,10 +1,7 @@
 package org.fadhel.ecommerceapi.Service;
 
 import lombok.RequiredArgsConstructor;
-import org.fadhel.ecommerceapi.Model.Merchant;
-import org.fadhel.ecommerceapi.Model.MerchantStock;
-import org.fadhel.ecommerceapi.Model.Product;
-import org.fadhel.ecommerceapi.Model.User;
+import org.fadhel.ecommerceapi.Model.*;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -15,6 +12,7 @@ public class UserService {
 
     ArrayList<User> users = new ArrayList<>();
     final ArrayList<String> giftedCustomersWith100 = new ArrayList<>();
+    ArrayList<Purchase>  purchases = new ArrayList<>();
 
     private final ProductService productService;
     private final MerchantService merchantService;
@@ -100,6 +98,7 @@ public class UserService {
         }
         merchantStock.setStock(merchantStock.getStock() - 1);
         user.setBalance(user.getBalance() - product.getPrice());
+        purchases.add(new Purchase(id,productID,merchantID));
 
         return 6;
     }
@@ -112,8 +111,6 @@ public class UserService {
         Merchant merchant = merchantService.getMerchantById(merchantID);
         MerchantStock merchantStock = merchantStockService.getMerchantStock(productID, merchantID);
 
-        Double discount10 = 10.0;
-        Double discountedPrice = product.getPrice()*discount10;
 
         if(user == null){
             return 0;
@@ -131,17 +128,31 @@ public class UserService {
         if(merchantStock.getStock() <= 0){
             return 4;
         }
+
+        Double discount10 = 10.0;
+        Double discountedPrice = product.getPrice() * (1 - discount10 / 100);
+
         if(user.getBalance() < discountedPrice){
             return 5;
         }
+
+        if(coupon == null){
+            return 6;
+        }
+
         if(!coupon.equals("10Discount")){
-           return 6;
+           return 7;
+        }
+
+        if(user.getBalance() < 1000){
+            return 8;
         }
 
         merchantStock.setStock(merchantStock.getStock() - 1);
-        user.setBalance(user.getBalance() - (product.getPrice() * (1-(discount10/100))));
+        user.setBalance(user.getBalance() -  discountedPrice);
+        purchases.add(new Purchase(id,productID,merchantID));
 
-        return 7;
+        return 9;
     }
 
     // 2 outOf 5 mandatory extras: to add more balance to user
@@ -160,16 +171,19 @@ public class UserService {
         User fromUser = getUserById(fromID);
         User toUser = getUserById(toID);
 
-        if(fromUser == null || toUser == null){
+        if(fromUser == null){
             return 0;
         }
-        if(fromUser.getBalance() < transferredBalance){
+        if(toUser == null){
             return 1;
+        }
+        if(fromUser.getBalance() < transferredBalance){
+            return 2;
         }
 
         fromUser.setBalance(fromUser.getBalance() - transferredBalance);
         toUser.setBalance(toUser.getBalance() + transferredBalance);
-        return 2;
+        return 3;
     }
 
     // 4 outOf 5 mandatory extras: to refund a product
@@ -182,11 +196,26 @@ public class UserService {
         if (product == null) return 1;
         if (merchantStock == null) return 2;
 
+        Purchase purchasedProduct = null;
+
+        for (Purchase purchase : purchases) {
+            if (purchase.getUserID().equals(id)
+                    && purchase.getProductID().equals(productID)
+                    && purchase.getMerchantID().equals(merchantID)) {
+                purchasedProduct = purchase;
+                break;
+            }
+        }
+
+        if (purchasedProduct == null) {
+            return 3;
+        }
+
         user.setBalance(user.getBalance() + product.getPrice());
-
         merchantStock.setStock(merchantStock.getStock() + 1);
+        purchases.remove(purchasedProduct);
 
-        return 3;
+        return 4;
     }
 
 //    public int withdrawBalance(String id, Double withdrawnBalance){
@@ -205,12 +234,21 @@ public class UserService {
 //    }
 
 
-    /* 1 outOf 3 real extras: to get all customers that have balance more than or equal to 1000
-     and gift them with 100 extra balance only one time
+    /* 1 outOf 3 real extras: to let admin can gift customers that have balance more than or equal to 1000
+    gifting them with 100 extra balance only one time
      */
-    public ArrayList<User> giftCustomersWithBalanceMoreThanOrEqualsTo1000() {
+    public int giftCustomersWithBalanceMoreThanOrEqualsTo1000(String adminID) {
 
         ArrayList<User> giftedCustomers = new ArrayList<>();
+
+        User admin = getUserById(adminID);
+
+        if(admin == null){
+            return 0;
+        }
+        if(!admin.getRole().equalsIgnoreCase("admin")){
+            return 1;
+        }
 
         for (User user : users) {
             if (user.getRole().equalsIgnoreCase("customer") &&
@@ -226,11 +264,11 @@ public class UserService {
                 giftedCustomers.add(user);
             }
         }
-        return giftedCustomers;
+        return 2;
     }
 
     // 2 outOf 3 real extras: buy a product and get one free
-    public int buyProductAndGetOneFree(String id, String productID, String merchantID){
+    public int buyProductAndGetOneFree(String id, String productID, String merchantID, String promoCode){
 
         User user = getUserById(id);
         Product product = productService.getProductById(productID);
@@ -249,20 +287,30 @@ public class UserService {
         if(merchantStock == null){
             return 3;
         }
+        if(promoCode == null){
+            return 4;
+        }
+        if(!promoCode.equals("freeProduct")){
+            return 5;
+        }
+        if(user.getBalance() < 3000){
+            return 6;
+        }
 
         // here stock must be more than or equals to 2 for the offer. so, I change it from 0 to 1
         if(merchantStock.getStock() <= 1){
-            return 4;
+            return 7;
         }
         if(user.getBalance() < product.getPrice()){
-            return 5;
+            return 8;
         }
 
         // here I change it from 1 to 2 to deduct from stock per the offer
         merchantStock.setStock(merchantStock.getStock() - 2);
         user.setBalance(user.getBalance() - product.getPrice());
+        purchases.add(new Purchase(id,productID,merchantID));
 
-        return 6;
+        return 9;
     }
 
 

@@ -208,6 +208,15 @@ All validation failures return `400` with `{ "message": "<validation error>" }`.
 | `merchantID` | Required, min 3 chars, must reference an existing merchant |
 | `stock` | Required, min **11** at creation |
 
+### Purchase
+| Field | Rules |
+|---|---|
+| `userID` | Required, min 3 chars, must reference an existing user |
+| `productID` | Required, min 3 chars, must reference an existing product |
+| `merchantID` | Required, min 3 chars, must reference an existing merchant |
+
+> Internal record of a completed buy (created from `/buy-product*`); not exposed via its own resource endpoint.
+
 ---
 
 ## Response Conventions

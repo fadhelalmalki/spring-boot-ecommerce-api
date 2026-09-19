@@ -257,7 +257,6 @@ src/main/java/org/fadhel/ecommerceapi
 ## Known Limitations
 
 - **No database** — data lives in-memory and is lost on restart.
-- **Non-standard REST design** — actions use paths like `/get`, `/add`, `/update/{id}` rather than conventional REST verbs and resource nouns.
 - **No global exception handler** — validation and error handling are done per-controller.
 - **No authentication / authorization** — any client can call any endpoint.
 - **No pagination / sorting / search** beyond the two price filters.
@@ -268,5 +267,4 @@ src/main/java/org/fadhel/ecommerceapi
 - Introduce OpenAPI/Swagger documentation.
 - Add Spring Security + JWT authentication and role-based access.
 - Centralize error handling with `@RestControllerAdvice`.
-- Refactor endpoints to a conventional RESTful design.
 - Add comprehensive integration tests.
